@@ -5,8 +5,12 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'cok-gizli-bir-anahtar-buraya-yaz' # Bunu değiştirin
-# Render'da veritabanı silinmemesi için normalde Postgres gerekir ama basitlik için SQLite:
+
+# --- AYARLAR ---
+# Buraya klavyeden rastgele uzun bir şey sallasan da olur
+app.config['SECRET_KEY'] = 'bunu-kimse-tahmin-edemez-xs823-rastgele-yazi' 
+
+# Render'da veritabanı dosyasının yolu
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -26,7 +30,7 @@ class User(UserMixin, db.Model):
     bio = db.Column(db.String(200), default="Henüz bir bio eklenmedi.")
     background_url = db.Column(db.String(500), default="https://media.giphy.com/media/26tn33aiTi1jkl6H6/giphy.gif")
     profile_pic_url = db.Column(db.String(500), default="https://cdn.discordapp.com/embed/avatars/0.png")
-    music_url = db.Column(db.String(500), default="") # MP3 linki
+    music_url = db.Column(db.String(500), default="") 
     discord_link = db.Column(db.String(200), default="")
     instagram_link = db.Column(db.String(200), default="")
     view_count = db.Column(db.Integer, default=0)
@@ -35,7 +39,16 @@ class User(UserMixin, db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+# --- ÖNEMLİ: Tabloları Render'da oluşturmak için bu kod burada olmalı ---
+with app.app_context():
+    db.create_all()
+
 # --- Route'lar (Sayfalar) ---
+
+# Favicon hatasını önlemek için boş döndüren kod
+@app.route('/favicon.ico')
+def favicon():
+    return "", 204
 
 @app.route('/')
 def index():
@@ -47,10 +60,17 @@ def register():
         username = request.form.get('username').lower()
         password = request.form.get('password')
         
-        if User.query.filter_by(username=username).first():
+        # Kullanıcı adı kontrolü
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
             flash('Bu kullanıcı adı zaten alınmış!', 'error')
             return redirect(url_for('register'))
             
+        # Yasaklı kelimeler (sistem dosyaları vb.)
+        if username in ['admin', 'dashboard', 'login', 'register', 'logout', 'favicon.ico']:
+             flash('Bu kullanıcı adını alamazsın.', 'error')
+             return redirect(url_for('register'))
+
         new_user = User(username=username, password=generate_password_hash(password, method='scrypt'))
         db.session.add(new_user)
         db.session.commit()
@@ -95,20 +115,21 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
-# --- Kullanıcı Profili (Guns.lol benzeri sayfa) ---
 @app.route('/<username>')
 def profile(username):
+    # Favicon isteği buraya düşerse yoksay
+    if username == "favicon.ico":
+        return "", 404
+
     user = User.query.filter_by(username=username.lower()).first()
     if not user:
         return "Kullanıcı bulunamadı", 404
     
-    # Görüntülenme sayısını artır (basit sayaç)
+    # Görüntülenme sayısını artır
     user.view_count += 1
     db.session.commit()
     
     return render_template('profile.html', user=user)
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all() # Veritabanını oluşturur
     app.run(debug=True)
