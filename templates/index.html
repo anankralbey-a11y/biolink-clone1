@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="landing-container">
+    <h1>BioLink</h1>
+    <p>Kendi havalı profilini saniyeler içinde oluştur.</p>
+    <div class="buttons">
+        <a href="{{ url_for('login') }}" class="btn">Giriş Yap</a>
+        <a href="{{ url_for('register') }}" class="btn btn-outline">Kayıt Ol</a>
+    </div>
+</div>
+{% endblock %}
