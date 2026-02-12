@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-box">
+        <h2>Giriş Yap</h2>
+        <p class="auth-subtitle">Tekrar hoş geldin.</p>
+        
+        <!-- Hata Mesajları -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash-msg {{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <div class="input-group">
+                <label>Kullanıcı Adı</label>
+                <input type="text" name="username" required placeholder="Kullanıcı adın">
+            </div>
+            
+            <div class="input-group">
+                <label>Şifre</label>
+                <input type="password" name="password" required placeholder="••••••••">
+            </div>
+
+            <button type="submit" class="auth-btn">Giriş Yap</button>
+        </form>
+        
+        <div class="auth-footer">
+            Hesabın yok mu? <a href="{{ url_for('register') }}">Kayıt Ol</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+    <!-- SOL MENÜ -->
+    <div class="sidebar">
+        <div class="logo">guns.lol</div>
+        <ul class="nav-links">
+            <li class="active"><i class="fas fa-pen"></i> Özelleştir</li>
+            <li><a href="/{{ user.username }}" target="_blank"><i class="fas fa-link"></i> Sayfam</a></li>
+            <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Çıkış</a></li>
+        </ul>
+        <div class="user-mini">
+            <img src="{{ user.profile_pic_url }}" alt="avatar">
+            <span>{{ user.username }}</span>
+        </div>
+    </div>
+
+    <!-- SAĞ İÇERİK -->
+    <div class="main-content">
+        <form method="POST" enctype="multipart/form-data">
+            
+            <!-- DOSYA YÜKLEYİCİ -->
+            <h3>Dosya Yükleyici</h3>
+            <div class="grid-4">
+                <div class="upload-card">
+                    <i class="fas fa-image"></i>
+                    <span>Arka Plan</span>
+                    <input type="text" name="background_url" placeholder="URL Yapıştır (Önerilen)" value="{{ user.background_url }}">
+                    <input type="file" name="bg_file" accept="image/*,video/*">
+                </div>
+                <div class="upload-card">
+                    <i class="fas fa-music"></i>
+                    <span>Ses</span>
+                    <input type="text" name="audio_url" placeholder="MP3 URL" value="{{ user.audio_url }}">
+                    <input type="file" name="audio_file" accept="audio/*">
+                </div>
+                <div class="upload-card">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Profil Avatarı</span>
+                    <input type="text" name="profile_pic_url" placeholder="Avatar URL" value="{{ user.profile_pic_url }}">
+                    <input type="file" name="avatar_file" accept="image/*">
+                </div>
+                <div class="upload-card">
+                    <i class="fas fa-mouse-pointer"></i>
+                    <span>Özel İmleç</span>
+                    <small>Premium</small>
+                </div>
+            </div>
+
+            <!-- GENEL ÖZELLEŞTİRME -->
+            <h3>Genel Özelleştirme</h3>
+            <div class="panel-section">
+                <div class="form-group full-width">
+                    <label>Açıklama</label>
+                    <input type="text" name="description" value="{{ user.description }}" placeholder="bu benim açıklamam">
+                </div>
+                
+                <div class="form-group full-width">
+                    <label>Konum</label>
+                    <input type="text" name="location" value="{{ user.location }}" placeholder="Konumum">
+                </div>
+
+                <div class="slider-group">
+                    <label>Profil Opaklığı ({{ user.profile_opacity }}%)</label>
+                    <input type="range" name="profile_opacity" min="0" max="100" value="{{ user.profile_opacity }}">
+                </div>
+
+                <div class="slider-group">
+                    <label>Profil Bulanıklığı ({{ user.profile_blur }}px)</label>
+                    <input type="range" name="profile_blur" min="0" max="50" value="{{ user.profile_blur }}">
+                </div>
+            </div>
+
+            <!-- RENK ÖZELLEŞTİRME -->
+            <h3>Renk Özelleştirme</h3>
+            <div class="panel-section color-grid">
+                <div class="color-input">
+                    <label>Vurgu Rengi</label>
+                    <div class="color-wrapper">
+                        <input type="color" name="accent_color" value="{{ user.accent_color }}">
+                        <span>{{ user.accent_color }}</span>
+                    </div>
+                </div>
+                <div class="color-input">
+                    <label>Metin Rengi</label>
+                    <div class="color-wrapper">
+                        <input type="color" name="text_color" value="{{ user.text_color }}">
+                        <span>{{ user.text_color }}</span>
+                    </div>
+                </div>
+                <div class="color-input">
+                    <label>Arka Plan Rengi</label>
+                    <div class="color-wrapper">
+                        <input type="color" name="bg_color" value="{{ user.bg_color }}">
+                        <span>{{ user.bg_color }}</span>
+                    </div>
+                </div>
+                <div class="color-input">
+                    <label>İkon Rengi</label>
+                    <div class="color-wrapper">
+                        <input type="color" name="icon_color" value="{{ user.icon_color }}">
+                        <span>{{ user.icon_color }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DİĞER ÖZELLEŞTİRMELER (TOGGLES) -->
+            <h3>Diğer Özelleştirmeler</h3>
+            <div class="panel-section toggle-grid">
+                <div class="toggle-item">
+                    <span>Tek renkli ikonlar</span>
+                    <label class="switch">
+                        <input type="checkbox" name="monochrome_icons" {% if user.monochrome_icons %}checked{% endif %}>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="toggle-item">
+                    <span>Animasyonlu Başlık</span>
+                    <label class="switch">
+                        <input type="checkbox" name="animated_title" {% if user.animated_title %}checked{% endif %}>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="toggle-item">
+                    <span>Discord Presence</span>
+                    <label class="switch">
+                        <input type="checkbox" name="discord_rpc" {% if user.discord_rpc %}checked{% endif %}>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="toggle-item">
+                    <span>Badge Parlaması</span>
+                    <label class="switch">
+                        <input type="checkbox" name="badge_glow" {% if user.badge_glow %}checked{% endif %}>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- SOSYAL MEDYA -->
+            <h3>Sosyal Medya Linkleri</h3>
+            <div class="panel-section social-grid-inputs">
+                <div class="social-input"><i class="fab fa-discord"></i> <input type="text" name="discord" placeholder="Discord Link" value="{{ user.discord }}"></div>
+                <div class="social-input"><i class="fab fa-instagram"></i> <input type="text" name="instagram" placeholder="Instagram Link" value="{{ user.instagram }}"></div>
+                <div class="social-input"><i class="fab fa-spotify"></i> <input type="text" name="spotify" placeholder="Spotify Link" value="{{ user.spotify }}"></div>
+                <div class="social-input"><i class="fab fa-youtube"></i> <input type="text" name="youtube" placeholder="Youtube Link" value="{{ user.youtube }}"></div>
+                <div class="social-input"><i class="fab fa-telegram"></i> <input type="text" name="telegram" placeholder="Telegram Link" value="{{ user.telegram }}"></div>
+            </div>
+
+            <button type="submit" class="save-btn">Kaydet ve Yayınla</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

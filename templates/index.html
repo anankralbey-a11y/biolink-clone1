@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="landing-container">
+    <nav class="landing-nav">
+        <div class="logo">guns.lol</div>
+        <div class="nav-btns">
+            <a href="{{ url_for('login') }}" class="btn-text">Giriş Yap</a>
+            <a href="{{ url_for('register') }}" class="btn-primary">Kayıt Ol</a>
+        </div>
+    </nav>
+
+    <div class="hero-section">
+        <h1>Biyografini <span class="highlight">Yönet.</span></h1>
+        <p>Tüm sosyal medya hesaplarını, müziklerini ve tarzını tek bir linkte birleştir.</p>
+        <div class="hero-btns">
+            <a href="{{ url_for('register') }}" class="btn-hero">Hemen Başla</a>
+        </div>
+    </div>
+    
+    <div class="footer-links">
+        <span>Terms</span>
+        <span>Privacy</span>
+        <span>Contact</span>
+    </div>
+</div>
+{% endblock %}
