@@ -4,8 +4,6 @@
 <div class="auth-wrapper">
     <div class="auth-box">
         <h2>Kayıt Ol</h2>
-        <p class="auth-subtitle">Kendine özel alanını oluştur.</p>
-
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
             {% for category, message in messages %}
@@ -13,21 +11,17 @@
             {% endfor %}
           {% endif %}
         {% endwith %}
-
         <form method="POST">
             <div class="input-group">
-                <label>Kullanıcı Adı</label>
-                <input type="text" name="username" required placeholder="İngilizce karakterler">
+                <label>Kullanıcı Adı (İngilizce, boşluksuz)</label>
+                <input type="text" name="username" required>
             </div>
-            
             <div class="input-group">
                 <label>Şifre</label>
-                <input type="password" name="password" required placeholder="••••••••">
+                <input type="password" name="password" required>
             </div>
-
             <button type="submit" class="auth-btn">Hesap Oluştur</button>
         </form>
-        
         <div class="auth-footer">
             Zaten hesabın var mı? <a href="{{ url_for('login') }}">Giriş Yap</a>
         </div>
