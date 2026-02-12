@@ -56,6 +56,11 @@
                     <input type="text" name="description" value="{{ user.description }}" placeholder="bu benim açıklamam">
                 </div>
                 
+            <div class="form-group full-width">
+    <label>Görünen İsim (Sayfa Başlığı)</label>
+    <input type="text" name="display_name" value="{{ user.display_name }}" placeholder="Görünen İsim">
+</div>
+                
                 <div class="form-group full-width">
                     <label>Konum</label>
                     <input type="text" name="location" value="{{ user.location }}" placeholder="Konumum">
@@ -152,4 +157,5 @@
         </form>
     </div>
 </div>
+
 {% endblock %}
