@@ -1,0 +1,144 @@
+/* GENEL */
+body {
+    background-color: #080808;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+}
+
+/* DASHBOARD LAYOUT */
+.dashboard-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 250px;
+    background: #0d0d0d;
+    border-right: 1px solid #1f1f1f;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 40px;
+    background: linear-gradient(45deg, #fff, #888);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.nav-links { list-style: none; padding: 0; }
+.nav-links li {
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #888;
+    transition: 0.3s;
+}
+.nav-links li.active, .nav-links li:hover {
+    background: #1a1a1a;
+    color: #fff;
+}
+.nav-links a { text-decoration: none; color: inherit; display: block; }
+.nav-links i { margin-right: 10px; }
+
+.user-mini { margin-top: auto; display: flex; align-items: center; gap: 10px; padding-top: 20px; border-top: 1px solid #1f1f1f; }
+.user-mini img { width: 30px; height: 30px; border-radius: 50%; }
+
+/* MAIN CONTENT */
+.main-content {
+    flex: 1;
+    padding: 40px;
+    overflow-y: auto;
+}
+
+h3 { color: #888; font-size: 14px; text-transform: uppercase; margin-top: 30px; margin-bottom: 15px; }
+
+/* DOSYA YÜKLEYİCİ GRID */
+.grid-4 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.upload-card {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+.upload-card:hover { border-color: #444; }
+.upload-card i { font-size: 24px; color: #fff; margin-bottom: 10px; display: block; }
+.upload-card span { font-size: 14px; color: #aaa; }
+/* Inputları gizle ama çalışsın */
+.upload-card input[type="file"] {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;
+}
+.upload-card input[type="text"] {
+    width: 90%; margin-top: 10px; background: #000; border: 1px solid #333; color: white; padding: 5px; border-radius: 5px; font-size: 10px;
+}
+
+/* GENEL PANELLER */
+.panel-section {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; margin-bottom: 8px; color: #aaa; font-size: 12px; }
+input[type="text"], textarea {
+    width: 100%;
+    background: #080808;
+    border: 1px solid #222;
+    color: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+/* SLIDER */
+input[type=range] { width: 100%; }
+
+/* RENK SEÇİCİLER */
+.color-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+.color-wrapper {
+    display: flex; align-items: center; background: #080808; border: 1px solid #222; padding: 5px; border-radius: 8px;
+}
+input[type="color"] { border: none; background: none; width: 30px; height: 30px; cursor: pointer; }
+.color-wrapper span { font-size: 12px; margin-left: 10px; color: #777; }
+
+/* TOGGLE SWITCHES */
+.toggle-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+.toggle-item { display: flex; justify-content: space-between; align-items: center; }
+
+.switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 34px; }
+.slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+input:checked + .slider { background-color: #fff; }
+input:checked + .slider:before { transform: translateX(20px); background-color: #000; }
+
+/* KAYDET BUTONU */
+.save-btn {
+    margin-top: 20px;
+    background: #fff;
+    color: #000;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    float: right;
+}
+.save-btn:hover { background: #ddd; }
