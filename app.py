@@ -6,7 +6,7 @@ from werkzeug.utils import secure_filename
 import os
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'gizli-anahtar-12345'
+app.config['SECRET_KEY'] = 'gizli-anahtar-12345-bunu-salla'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
@@ -35,11 +35,11 @@ class User(UserMixin, db.Model):
     display_name = db.Column(db.String(50), default="Kullanıcı")
     description = db.Column(db.String(300), default="")
     location = db.Column(db.String(50), default="")
-    discord_rpc = db.Column(db.Boolean, default=False) # Discord Presence
+    discord_rpc = db.Column(db.Boolean, default=False) 
     
     # --- Görünüm Ayarları ---
-    profile_opacity = db.Column(db.Integer, default=50) # 0-100
-    profile_blur = db.Column(db.Integer, default=10)    # 0-100 px
+    profile_opacity = db.Column(db.Integer, default=50) 
+    profile_blur = db.Column(db.Integer, default=10)    
     
     # --- Renk Özelleştirme ---
     accent_color = db.Column(db.String(20), default="#ffffff")
@@ -52,7 +52,7 @@ class User(UserMixin, db.Model):
     animated_title = db.Column(db.Boolean, default=False)
     badge_glow = db.Column(db.Boolean, default=False)
     
-    # --- Sosyal Medya (JSON yerine basit sütunlar) ---
+    # --- Sosyal Medya ---
     discord = db.Column(db.String(200), default="")
     instagram = db.Column(db.String(200), default="")
     youtube = db.Column(db.String(200), default="")
@@ -68,6 +68,11 @@ class User(UserMixin, db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+# --- ÖNEMLİ: TABLOLARI OLUŞTURMA ---
+# Render'da Gunicorn kullanıldığı için burası dışarıda olmalı
+with app.app_context():
+    db.create_all()
+
 # --- Helper: Dosya Yükleme ---
 def save_file(file):
     if file and file.filename != '':
@@ -77,6 +82,11 @@ def save_file(file):
     return None
 
 # --- Rotalar ---
+
+# Favicon Hatasını Engelle
+@app.route('/favicon.ico')
+def favicon():
+    return "", 204
 
 @app.route('/')
 def index():
@@ -99,9 +109,16 @@ def register():
     if request.method == 'POST':
         username = request.form.get('username').lower()
         password = request.form.get('password')
+        
+        # Yasaklı kelimeler
+        if username in ['admin', 'dashboard', 'login', 'register', 'favicon.ico', 'static']:
+             flash('Bu kullanıcı adı alınamaz.', 'error')
+             return redirect(url_for('register'))
+
         if User.query.filter_by(username=username).first():
             flash('Kullanıcı adı dolu.', 'error')
             return redirect(url_for('register'))
+            
         new_user = User(username=username, password=generate_password_hash(password))
         db.session.add(new_user)
         db.session.commit()
@@ -113,7 +130,7 @@ def register():
 @login_required
 def dashboard():
     if request.method == 'POST':
-        # Dosya Yüklemeleri (Varsa yükle, yoksa formdaki URL'yi al)
+        # Dosya Yüklemeleri
         bg_file = request.files.get('bg_file')
         if bg_file: current_user.background_url = save_file(bg_file)
         elif request.form.get('background_url'): current_user.background_url = request.form.get('background_url')
@@ -138,7 +155,7 @@ def dashboard():
         current_user.bg_color = request.form.get('bg_color')
         current_user.icon_color = request.form.get('icon_color')
         
-        # Toggle Switchler (Checkbox gelmezse False yap)
+        # Toggle Switchler
         current_user.monochrome_icons = 'monochrome_icons' in request.form
         current_user.animated_title = 'animated_title' in request.form
         current_user.badge_glow = 'badge_glow' in request.form
@@ -159,6 +176,10 @@ def dashboard():
 
 @app.route('/<username>')
 def profile(username):
+    # Favicon buraya düşerse engelle
+    if username == "favicon.ico":
+        return "", 404
+
     user = User.query.filter_by(username=username.lower()).first()
     if not user: return "Kullanıcı bulunamadı", 404
     user.view_count += 1
@@ -172,6 +193,4 @@ def logout():
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)
