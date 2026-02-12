@@ -185,6 +185,7 @@ h3 { color: #888; font-size: 14px; text-transform: uppercase; margin-top: 30px; 
     gap: 20px;
 }
 
+/* --- DOSYA YÜKLEYİCİ KARTLARI (DÜZELTİLMİŞ) --- */
 .upload-card {
     background: #111;
     border: 1px solid #222;
@@ -192,25 +193,64 @@ h3 { color: #888; font-size: 14px; text-transform: uppercase; margin-top: 30px; 
     padding: 20px;
     text-align: center;
     transition: 0.3s;
-    position: relative;
+    position: relative; /* Önemli */
     overflow: hidden;
-    min-height: 120px;
+    min-height: 140px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
 }
-.upload-card:hover { border-color: #444; }
-.upload-card i { font-size: 24px; color: #fff; margin-bottom: 10px; display: block; }
-.upload-card span { font-size: 14px; color: #aaa; }
 
-/* Input stil düzenlemeleri */
-.upload-card input[type="file"] {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2;
+.upload-card:hover { border-color: #444; }
+
+.upload-card i { 
+    font-size: 24px; 
+    color: #fff; 
+    margin-bottom: 10px; 
+    display: block; 
+    pointer-events: none; /* İkona tıklayınca arkadaki input çalışsın */
 }
+
+.upload-card span { 
+    font-size: 14px; 
+    color: #aaa; 
+    margin-bottom: 15px;
+    pointer-events: none;
+}
+
+/* --- KİLİT NOKTA: INPUT AYARLARI --- */
+
+/* 1. DOSYA YÜKLEME (GİZLİ KATMAN - ARKADA) */
+.upload-card input[type="file"] {
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    opacity: 0; 
+    cursor: pointer; 
+    z-index: 1; /* En altta duracak */
+}
+
+/* 2. URL GİRME (GÖRÜNÜR KATMAN - ÖNDE) */
 .upload-card input[type="text"] {
-    width: 90%; margin-top: 10px; background: #000; border: 1px solid #333; 
-    color: white; padding: 5px; border-radius: 5px; font-size: 10px; z-index: 3; position: relative;
+    width: 100%; 
+    background: #000; 
+    border: 1px solid #333; 
+    color: white; 
+    padding: 8px; 
+    border-radius: 5px; 
+    font-size: 11px; 
+    
+    position: relative; /* Pozisyon veriyoruz ki z-index çalışsın */
+    z-index: 10; /* EN ÜSTTE! Böylece tıklanabilir */
+}
+
+/* Text inputa tıklayınca kenarlığı parlat */
+.upload-card input[type="text"]:focus {
+    border-color: #fff;
+    outline: none;
 }
 
 /* GENEL PANELLER */
