@@ -12,7 +12,6 @@
             --text: {{ user.text_color }};
             --bg-color: {{ user.bg_color }};
             --icon-color: {{ user.icon_color }};
-            /* Opaklık yüzdesini ondalık sayıya çeviriyoruz (Örn: 50 -> 0.5) */
             --opacity: {{ user.profile_opacity / 100 }};
             --blur: {{ user.profile_blur }}px;
         }
@@ -21,67 +20,52 @@
             margin: 0; padding: 0; 
             width: 100%; height: 100%; 
             overflow: hidden;
-            background-color: #000; /* Eğer resim yüklenmezse siyah kalsın */
+            /* Arka plan rengi burada devreye girer */
+            background-color: var(--bg-color) !important;
             font-family: 'Courier New', monospace;
             color: var(--text);
         }
 
-        /* --- ARKA PLAN (EN ALT KATMAN) --- */
+        /* ARKA PLAN MEDYASI */
         .bg-media {
             position: fixed; 
             top: 0; left: 0; 
             width: 100%; height: 100%; 
-            z-index: -2; /* En altta */
+            z-index: -2; /* En altta resim/video durur */
             object-fit: cover;
+            display: block;
         }
 
-        /* --- SİYAH PERDE (ARKA PLAN RENGİ) --- */
-        /* Kullanıcı panelden arka plan rengi seçtiyse o renk resmin üzerine biner */
+        /* ARKA PLAN KARARTMA (TINT) */
+        /* Bu katman, resmin üzerine biner ve seçtiğiniz Arka Plan Rengini resme yedirir */
         .bg-overlay {
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            z-index: -1;
+            z-index: -1; /* Resmin hemen üstü */
             background-color: var(--bg-color);
-            opacity: 0.5; /* Arka plan resminin hafif görünmesi için varsayılan şeffaflık */
+            opacity: 0.6; /* Resmin görünmesi için %60 karartma (İstersen bunu değiştirebilirsin) */
         }
 
-        /* --- CLICK TO ENTER (TIKLA GİR) --- */
         #enter-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; 
-            z-index: 9999; 
-            display: flex;
-            justify-content: center; align-items: center; 
-            cursor: pointer;
+            background: #000; z-index: 9999; display: flex;
+            justify-content: center; align-items: center; cursor: pointer;
             transition: opacity 0.5s ease;
         }
-        .click-text { 
-            font-size: 24px; 
-            animation: pulse 1.5s infinite; 
-            color: var(--accent);
-            text-shadow: 0 0 10px var(--accent);
-            font-weight: bold;
-        }
+        .click-text { font-size: 24px; animation: pulse 1.5s infinite; color: var(--accent); font-weight: bold; }
 
-        /* --- PROFİL KARTI --- */
         .profile-card {
-            display: none; /* Başlangıçta gizli */
+            display: none;
             position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 90%;
-            max-width: 350px;
-            padding: 30px;
-            border-radius: 15px;
-            
-            /* Kullanıcının seçtiği opaklık ve bulanıklık */
+            width: 90%; max-width: 350px;
+            padding: 30px; border-radius: 15px;
             background: rgba(0, 0, 0, var(--opacity));
             backdrop-filter: blur(var(--blur));
             -webkit-backdrop-filter: blur(var(--blur));
-            
             border: 1px solid rgba(255, 255, 255, 0.1);
             text-align: center;
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
             z-index: 10;
         }
 
@@ -92,90 +76,51 @@
             {% if user.badge_glow %} box-shadow: 0 0 20px var(--accent); {% endif %}
         }
 
-        .username { 
-            font-size: 24px; 
-            font-weight: bold; 
-            margin-bottom: 5px; 
-            text-shadow: 0 0 10px var(--accent); 
-        }
+        .username { font-size: 24px; font-weight: bold; text-shadow: 0 0 10px var(--accent); }
+        .desc { font-size: 14px; margin: 15px 0; opacity: 0.9; line-height: 1.4; white-space: pre-wrap; }
         
-        .desc { 
-            font-size: 14px; 
-            margin-bottom: 20px; 
-            white-space: pre-wrap; 
-            opacity: 0.9; 
-            line-height: 1.4;
-        }
-        
-        .socials { 
-            display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; 
-            margin-top: 15px;
-        }
-        .socials a {
-            font-size: 22px; 
-            color: var(--icon-color); 
-            transition: 0.3s;
-            text-decoration: none;
-        }
-        .socials a:hover { 
-            transform: scale(1.2); 
-            color: var(--accent); 
-            text-shadow: 0 0 10px var(--accent); 
-        }
-
-        .view-count {
-            margin-top: 20px; font-size: 10px; opacity: 0.5;
-        }
+        .socials { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+        .socials a { font-size: 22px; color: var(--icon-color); transition: 0.3s; }
+        .socials a:hover { transform: scale(1.2); color: var(--accent); }
 
         @keyframes pulse { 0% {opacity:0.5;} 50% {opacity:1;} 100% {opacity:0.5;} }
-        @keyframes fadeIn { from { opacity: 0; transform: translate(-50%, -40%); } to { opacity: 1; transform: translate(-50%, -50%); } }
     </style>
 </head>
 <body>
 
-    <!-- 1. ARKA PLAN MEDYASI (Video veya Resim) -->
+    <!-- ARKA PLAN SİSTEMİ -->
     {% if user.background_url %}
-        {% if user.background_url.endswith('.mp4') or user.background_url.endswith('.webm') %}
+        {% set url = user.background_url.lower() %}
+        {% if '.mp4' in url or '.webm' in url or '.mov' in url %}
             <video class="bg-media" autoplay loop muted playsinline>
                 <source src="{{ user.background_url }}" type="video/mp4">
             </video>
         {% else %}
-            <img class="bg-media" src="{{ user.background_url }}" alt="Background">
+            <img class="bg-media" src="{{ user.background_url }}" id="bg-img">
         {% endif %}
+        
+        <!-- Eğer bir resim/video varsa, üzerine hafif karartma ekle ki yazılar okunsun -->
+        <div class="bg-overlay"></div>
     {% endif %}
 
-    <!-- 2. RENK KATMANI (Resmin üzerine hafif renk atar) -->
-    <div class="bg-overlay"></div>
-
-    <!-- 3. GİRİŞ EKRANI -->
     <div id="enter-overlay" onclick="enterSite()">
         <div class="click-text">tıkla</div>
     </div>
 
-    <!-- 4. SES DOSYASI -->
-    <!-- src direkt audio içine yazıldı, source etiketi kullanılmadı -->
     <audio id="bg-music" loop src="{{ user.audio_url }}"></audio>
 
-    <!-- 5. PROFİL KARTI -->
     <div class="profile-card" id="profile-card">
-        <img src="{{ user.profile_pic_url }}" class="avatar" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
-        
-        <div class="username">
-            {{ user.display_name if user.display_name else user.username }}
-        </div>
+        <img src="{{ user.profile_pic_url }}" class="avatar">
+        <div class="username">{{ user.display_name if user.display_name else user.username }}</div>
         
         {% if user.discord_rpc %}
-        <div style="font-size:12px; margin-bottom:10px; color:#aaa;">
-            <i class="fab fa-discord"></i> Discord'da
-        </div>
+            <div style="font-size:12px; margin-bottom:10px; color:#aaa;"><i class="fab fa-discord"></i> Online</div>
         {% endif %}
 
         <div class="desc">{{ user.description }}</div>
         
         {% if user.location %}
-        <div style="font-size:12px; margin-bottom:15px; color:#ccc;">
-            <i class="fas fa-map-marker-alt"></i> {{ user.location }}
-        </div>
+            <div style="font-size:12px; margin-bottom:15px; color:#ccc;"><i class="fas fa-map-marker-alt"></i> {{ user.location }}</div>
         {% endif %}
 
         <div class="socials">
@@ -188,52 +133,30 @@
             {% if user.twitter %}<a href="{{ user.twitter }}" target="_blank"><i class="fab fa-twitter"></i></a>{% endif %}
         </div>
         
-        <div class="view-count">
-            <i class="fas fa-eye"></i> {{ user.view_count }}
-        </div>
+        <div style="margin-top:20px; font-size:10px; opacity:0.5;"><i class="fas fa-eye"></i> {{ user.view_count }}</div>
     </div>
 
     <script>
-        // Animasyonlu Başlık
         {% if user.animated_title %}
         let titleText = " @{{ user.username }} ";
-        let i = 0;
-        setInterval(() => {
-            document.title = titleText.substring(i) + titleText.substring(0, i);
-            i = (i + 1) % titleText.length;
-        }, 400);
+        let i = 0; setInterval(() => { document.title = titleText.substring(i) + titleText.substring(0, i); i = (i + 1) % titleText.length; }, 400);
         {% endif %}
 
-        // Siteye Giriş Fonksiyonu
         function enterSite() {
-            var overlay = document.getElementById('enter-overlay');
-            var card = document.getElementById('profile-card');
-            var audio = document.getElementById('bg-music');
+            const overlay = document.getElementById('enter-overlay');
+            const card = document.getElementById('profile-card');
+            const audio = document.getElementById('bg-music');
 
-            // 1. MÜZİĞİ HEMEN BAŞLAT (Bekleme yapma!)
             if (audio.getAttribute('src')) {
-                audio.volume = 0.5; // Ses seviyesi %50
-                var playPromise = audio.play();
-                
-                if (playPromise !== undefined) {
-                    playPromise.then(_ => {
-                        console.log("Müzik çalıyor.");
-                    })
-                    .catch(error => {
-                        console.log("Müzik hatası:", error);
-                    });
-                }
+                audio.volume = 0.4;
+                audio.play().catch(e => console.log("Audio play error"));
             }
 
-            // 2. GÖRSEL EFEKTLERİ YAP
             overlay.style.opacity = '0';
-            
-            // Overlay'i tamamen kaldır ve kartı göster
-            setTimeout(function() {
+            setTimeout(() => {
                 overlay.style.display = 'none';
                 card.style.display = 'block';
-                card.style.animation = 'fadeIn 1s forwards';
-            }, 500); // 0.5 saniye sonra kart gelir
+            }, 500);
         }
     </script>
 </body>
