@@ -2,7 +2,6 @@
 
 {% block content %}
 <div class="dashboard-wrapper">
-    <!-- SOL MENÜ -->
     <div class="sidebar">
         <div class="logo">guns.lol</div>
         <ul class="nav-links">
@@ -16,54 +15,61 @@
         </div>
     </div>
 
-    <!-- SAĞ İÇERİK -->
     <div class="main-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash-msg {{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
         <form method="POST" enctype="multipart/form-data">
             
-            <!-- DOSYA YÜKLEYİCİ -->
             <h3>Dosya Yükleyici</h3>
             <div class="grid-4">
+                <!-- Arka Plan Kartı -->
                 <div class="upload-card">
                     <i class="fas fa-image"></i>
                     <span>Arka Plan</span>
-                    <input type="text" name="background_url" placeholder="URL Yapıştır (Önerilen)" value="{{ user.background_url }}">
-                    <input type="file" name="bg_file" accept="image/*,video/*">
+                    <!-- Gizli Dosya Inputu (Kartın üstüne yayılır ama text inputa engel olmaz) -->
+                    <input type="file" name="bg_file" accept="image/*,video/*" class="file-input">
+                    <!-- Görünür Text Inputu (Z-index ile önde) -->
+                    <input type="text" name="background_url" placeholder="veya URL Yapıştır" value="{{ user.background_url }}" class="url-input">
                 </div>
+
+                <!-- Ses Kartı -->
                 <div class="upload-card">
                     <i class="fas fa-music"></i>
                     <span>Ses</span>
-                    <input type="text" name="audio_url" placeholder="MP3 URL" value="{{ user.audio_url }}">
-                    <input type="file" name="audio_file" accept="audio/*">
+                    <input type="file" name="audio_file" accept="audio/*" class="file-input">
+                    <input type="text" name="audio_url" placeholder="MP3 URL" value="{{ user.audio_url }}" class="url-input">
                 </div>
+
+                <!-- Avatar Kartı -->
                 <div class="upload-card">
                     <i class="fas fa-user-circle"></i>
                     <span>Profil Avatarı</span>
-                    <input type="text" name="profile_pic_url" placeholder="Avatar URL" value="{{ user.profile_pic_url }}">
-                    <input type="file" name="avatar_file" accept="image/*">
-                </div>
-                <div class="upload-card">
-                    <i class="fas fa-mouse-pointer"></i>
-                    <span>Özel İmleç</span>
-                    <small>Premium</small>
+                    <input type="file" name="avatar_file" accept="image/*" class="file-input">
+                    <input type="text" name="profile_pic_url" placeholder="Avatar URL" value="{{ user.profile_pic_url }}" class="url-input">
                 </div>
             </div>
 
-            <!-- GENEL ÖZELLEŞTİRME -->
             <h3>Genel Özelleştirme</h3>
             <div class="panel-section">
                 <div class="form-group full-width">
-                    <label>Açıklama</label>
-                    <input type="text" name="description" value="{{ user.description }}" placeholder="bu benim açıklamam">
+                    <label>Görünen İsim (Sayfa Başlığı)</label>
+                    <input type="text" name="display_name" value="{{ user.display_name }}">
                 </div>
-                
-            <div class="form-group full-width">
-    <label>Görünen İsim (Sayfa Başlığı)</label>
-    <input type="text" name="display_name" value="{{ user.display_name }}" placeholder="Görünen İsim">
-</div>
+
+                <div class="form-group full-width">
+                    <label>Açıklama</label>
+                    <textarea name="description" rows="3">{{ user.description }}</textarea>
+                </div>
                 
                 <div class="form-group full-width">
                     <label>Konum</label>
-                    <input type="text" name="location" value="{{ user.location }}" placeholder="Konumum">
+                    <input type="text" name="location" value="{{ user.location }}">
                 </div>
 
                 <div class="slider-group">
@@ -77,7 +83,6 @@
                 </div>
             </div>
 
-            <!-- RENK ÖZELLEŞTİRME -->
             <h3>Renk Özelleştirme</h3>
             <div class="panel-section color-grid">
                 <div class="color-input">
@@ -95,7 +100,7 @@
                     </div>
                 </div>
                 <div class="color-input">
-                    <label>Arka Plan Rengi</label>
+                    <label>Arka Plan</label>
                     <div class="color-wrapper">
                         <input type="color" name="bg_color" value="{{ user.bg_color }}">
                         <span>{{ user.bg_color }}</span>
@@ -110,7 +115,6 @@
                 </div>
             </div>
 
-            <!-- DİĞER ÖZELLEŞTİRMELER (TOGGLES) -->
             <h3>Diğer Özelleştirmeler</h3>
             <div class="panel-section toggle-grid">
                 <div class="toggle-item">
@@ -143,19 +147,19 @@
                 </div>
             </div>
 
-            <!-- SOSYAL MEDYA -->
-            <h3>Sosyal Medya Linkleri</h3>
+            <h3>Sosyal Medya</h3>
             <div class="panel-section social-grid-inputs">
                 <div class="social-input"><i class="fab fa-discord"></i> <input type="text" name="discord" placeholder="Discord Link" value="{{ user.discord }}"></div>
                 <div class="social-input"><i class="fab fa-instagram"></i> <input type="text" name="instagram" placeholder="Instagram Link" value="{{ user.instagram }}"></div>
                 <div class="social-input"><i class="fab fa-spotify"></i> <input type="text" name="spotify" placeholder="Spotify Link" value="{{ user.spotify }}"></div>
                 <div class="social-input"><i class="fab fa-youtube"></i> <input type="text" name="youtube" placeholder="Youtube Link" value="{{ user.youtube }}"></div>
                 <div class="social-input"><i class="fab fa-telegram"></i> <input type="text" name="telegram" placeholder="Telegram Link" value="{{ user.telegram }}"></div>
+                <div class="social-input"><i class="fab fa-tiktok"></i> <input type="text" name="tiktok" placeholder="TikTok Link" value="{{ user.tiktok }}"></div>
+                <div class="social-input"><i class="fab fa-twitter"></i> <input type="text" name="twitter" placeholder="X / Twitter Link" value="{{ user.twitter }}"></div>
             </div>
 
             <button type="submit" class="save-btn">Kaydet ve Yayınla</button>
         </form>
     </div>
 </div>
-
 {% endblock %}
