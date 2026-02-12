@@ -23,12 +23,10 @@
             color: var(--text);
         }
 
-        /* ARKA PLAN */
         .bg-media {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; object-fit: cover;
         }
 
-        /* GİRİŞ EKRANI */
         #enter-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 999; display: flex;
@@ -37,7 +35,6 @@
         }
         .click-text { font-size: 24px; animation: pulse 1.5s infinite; color: var(--accent); }
 
-        /* KART */
         .profile-card {
             display: none;
             position: absolute; top: 50%; left: 50%;
@@ -68,20 +65,13 @@
         }
         .socials a:hover { transform: scale(1.2); color: var(--accent); text-shadow: 0 0 10px var(--accent); }
 
-        /* Müzik Player Gizli */
-        audio { display: none; }
-
         @keyframes pulse { 0% {opacity:0.5;} 50% {opacity:1;} 100% {opacity:0.5;} }
     </style>
 </head>
 <body>
-
-    <!-- Arka Plan (Video veya Resim Kontrolü) -->
     {% if user.background_url %}
         {% if user.background_url.endswith('.mp4') or user.background_url.endswith('.webm') %}
-            <video class="bg-media" autoplay loop muted playsinline>
-                <source src="{{ user.background_url }}" type="video/mp4">
-            </video>
+            <video class="bg-media" autoplay loop muted playsinline><source src="{{ user.background_url }}"></video>
         {% else %}
             <img class="bg-media" src="{{ user.background_url }}">
         {% endif %}
@@ -91,27 +81,14 @@
         <div class="click-text">tıkla</div>
     </div>
 
-    <audio id="bg-music" loop>
-        <source src="{{ user.audio_url }}" type="audio/mpeg">
-    </audio>
+    <audio id="bg-music" loop><source src="{{ user.audio_url }}"></audio>
 
     <div class="profile-card" id="profile-card">
         <img src="{{ user.profile_pic_url }}" class="avatar">
         <div class="username">{{ user.display_name }}</div>
-        
-        {% if user.discord_rpc %}
-        <div style="font-size:12px; margin-bottom:10px; color:#aaa;">
-            <i class="fab fa-discord"></i> Discord'da Oynuyor
-        </div>
-        {% endif %}
-
+        {% if user.discord_rpc %}<div style="font-size:12px; margin-bottom:10px; color:#aaa;"><i class="fab fa-discord"></i> Discord'da Oynuyor</div>{% endif %}
         <div class="desc">{{ user.description }}</div>
-        
-        {% if user.location %}
-        <div style="font-size:12px; margin-bottom:15px; color:#777;">
-            <i class="fas fa-map-marker-alt"></i> {{ user.location }}
-        </div>
-        {% endif %}
+        {% if user.location %}<div style="font-size:12px; margin-bottom:15px; color:#777;"><i class="fas fa-map-marker-alt"></i> {{ user.location }}</div>{% endif %}
 
         <div class="socials">
             {% if user.discord %}<a href="{{ user.discord }}" target="_blank"><i class="fab fa-discord"></i></a>{% endif %}
@@ -119,37 +96,25 @@
             {% if user.spotify %}<a href="{{ user.spotify }}" target="_blank"><i class="fab fa-spotify"></i></a>{% endif %}
             {% if user.youtube %}<a href="{{ user.youtube }}" target="_blank"><i class="fab fa-youtube"></i></a>{% endif %}
             {% if user.telegram %}<a href="{{ user.telegram }}" target="_blank"><i class="fab fa-telegram"></i></a>{% endif %}
+            {% if user.tiktok %}<a href="{{ user.tiktok }}" target="_blank"><i class="fab fa-tiktok"></i></a>{% endif %}
+            {% if user.twitter %}<a href="{{ user.twitter }}" target="_blank"><i class="fab fa-twitter"></i></a>{% endif %}
         </div>
-        
-        <div style="margin-top:20px; font-size:10px; opacity:0.5;">
-            <i class="fas fa-eye"></i> {{ user.view_count }}
-        </div>
+        <div style="margin-top:20px; font-size:10px; opacity:0.5;"><i class="fas fa-eye"></i> {{ user.view_count }}</div>
     </div>
 
     <script>
         {% if user.animated_title %}
         let titleText = " @{{ user.username }} ";
-        let titleIndex = 0;
-        setInterval(() => {
-            document.title = titleText.substring(titleIndex) + titleText.substring(0, titleIndex);
-            titleIndex = (titleIndex + 1) % titleText.length;
-        }, 300);
+        let i = 0; setInterval(() => { document.title = titleText.substring(i) + titleText.substring(0, i); i = (i + 1) % titleText.length; }, 300);
         {% endif %}
-
         function enterSite() {
-            var overlay = document.getElementById('enter-overlay');
-            var card = document.getElementById('profile-card');
-            var audio = document.getElementById('bg-music');
-            
-            overlay.style.opacity = '0';
+            document.getElementById('enter-overlay').style.opacity = '0';
             setTimeout(() => {
-                overlay.style.display = 'none';
-                card.style.display = 'block';
-                card.style.animation = 'fadeIn 1s forwards';
-                if(audio.getAttribute('src')) {
-                    audio.volume = 0.3;
-                    audio.play();
-                }
+                document.getElementById('enter-overlay').style.display = 'none';
+                document.getElementById('profile-card').style.display = 'block';
+                document.getElementById('profile-card').style.animation = 'fadeIn 1s forwards';
+                let audio = document.getElementById('bg-music');
+                if(audio.getAttribute('src')) { audio.volume = 0.3; audio.play().catch(e=>console.log(e)); }
             }, 800);
         }
     </script>
