@@ -12,83 +12,171 @@
             --text: {{ user.text_color }};
             --bg-color: {{ user.bg_color }};
             --icon-color: {{ user.icon_color }};
+            /* Opaklık yüzdesini ondalık sayıya çeviriyoruz (Örn: 50 -> 0.5) */
             --opacity: {{ user.profile_opacity / 100 }};
             --blur: {{ user.profile_blur }}px;
         }
 
         body, html {
-            margin: 0; padding: 0; height: 100%; overflow: hidden;
-            background-color: var(--bg-color);
+            margin: 0; padding: 0; 
+            width: 100%; height: 100%; 
+            overflow: hidden;
+            background-color: #000; /* Eğer resim yüklenmezse siyah kalsın */
             font-family: 'Courier New', monospace;
             color: var(--text);
         }
 
+        /* --- ARKA PLAN (EN ALT KATMAN) --- */
         .bg-media {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; object-fit: cover;
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            z-index: -2; /* En altta */
+            object-fit: cover;
         }
 
+        /* --- SİYAH PERDE (ARKA PLAN RENGİ) --- */
+        /* Kullanıcı panelden arka plan rengi seçtiyse o renk resmin üzerine biner */
+        .bg-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            background-color: var(--bg-color);
+            opacity: 0.5; /* Arka plan resminin hafif görünmesi için varsayılan şeffaflık */
+        }
+
+        /* --- CLICK TO ENTER (TIKLA GİR) --- */
         #enter-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 999; display: flex;
-            justify-content: center; align-items: center; cursor: pointer;
-            transition: opacity 0.8s ease;
+            background: #000; 
+            z-index: 9999; 
+            display: flex;
+            justify-content: center; align-items: center; 
+            cursor: pointer;
+            transition: opacity 0.5s ease;
         }
-        .click-text { font-size: 24px; animation: pulse 1.5s infinite; color: var(--accent); }
+        .click-text { 
+            font-size: 24px; 
+            animation: pulse 1.5s infinite; 
+            color: var(--accent);
+            text-shadow: 0 0 10px var(--accent);
+            font-weight: bold;
+        }
 
+        /* --- PROFİL KARTI --- */
         .profile-card {
-            display: none;
+            display: none; /* Başlangıçta gizli */
             position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 350px;
+            width: 90%;
+            max-width: 350px;
             padding: 30px;
             border-radius: 15px;
+            
+            /* Kullanıcının seçtiği opaklık ve bulanıklık */
             background: rgba(0, 0, 0, var(--opacity));
             backdrop-filter: blur(var(--blur));
+            -webkit-backdrop-filter: blur(var(--blur));
+            
             border: 1px solid rgba(255, 255, 255, 0.1);
             text-align: center;
             box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            z-index: 10;
         }
 
         .avatar {
             width: 120px; height: 120px; border-radius: 50%;
-            border: 2px solid var(--accent);
+            border: 3px solid var(--accent);
             margin-bottom: 15px; object-fit: cover;
-            {% if user.badge_glow %} box-shadow: 0 0 15px var(--accent); {% endif %}
+            {% if user.badge_glow %} box-shadow: 0 0 20px var(--accent); {% endif %}
         }
 
-        .username { font-size: 24px; font-weight: bold; margin-bottom: 5px; text-shadow: 0 0 10px var(--accent); }
-        .desc { font-size: 14px; margin-bottom: 20px; white-space: pre-wrap; opacity: 0.8; }
-        
-        .socials { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
-        .socials a {
-            font-size: 24px; color: var(--icon-color); transition: 0.3s;
+        .username { 
+            font-size: 24px; 
+            font-weight: bold; 
+            margin-bottom: 5px; 
+            text-shadow: 0 0 10px var(--accent); 
         }
-        .socials a:hover { transform: scale(1.2); color: var(--accent); text-shadow: 0 0 10px var(--accent); }
+        
+        .desc { 
+            font-size: 14px; 
+            margin-bottom: 20px; 
+            white-space: pre-wrap; 
+            opacity: 0.9; 
+            line-height: 1.4;
+        }
+        
+        .socials { 
+            display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; 
+            margin-top: 15px;
+        }
+        .socials a {
+            font-size: 22px; 
+            color: var(--icon-color); 
+            transition: 0.3s;
+            text-decoration: none;
+        }
+        .socials a:hover { 
+            transform: scale(1.2); 
+            color: var(--accent); 
+            text-shadow: 0 0 10px var(--accent); 
+        }
+
+        .view-count {
+            margin-top: 20px; font-size: 10px; opacity: 0.5;
+        }
 
         @keyframes pulse { 0% {opacity:0.5;} 50% {opacity:1;} 100% {opacity:0.5;} }
+        @keyframes fadeIn { from { opacity: 0; transform: translate(-50%, -40%); } to { opacity: 1; transform: translate(-50%, -50%); } }
     </style>
 </head>
 <body>
+
+    <!-- 1. ARKA PLAN MEDYASI (Video veya Resim) -->
     {% if user.background_url %}
         {% if user.background_url.endswith('.mp4') or user.background_url.endswith('.webm') %}
-            <video class="bg-media" autoplay loop muted playsinline><source src="{{ user.background_url }}"></video>
+            <video class="bg-media" autoplay loop muted playsinline>
+                <source src="{{ user.background_url }}" type="video/mp4">
+            </video>
         {% else %}
-            <img class="bg-media" src="{{ user.background_url }}">
+            <img class="bg-media" src="{{ user.background_url }}" alt="Background">
         {% endif %}
     {% endif %}
 
+    <!-- 2. RENK KATMANI (Resmin üzerine hafif renk atar) -->
+    <div class="bg-overlay"></div>
+
+    <!-- 3. GİRİŞ EKRANI -->
     <div id="enter-overlay" onclick="enterSite()">
         <div class="click-text">tıkla</div>
     </div>
 
-    <audio id="bg-music" loop><source src="{{ user.audio_url }}"></audio>
+    <!-- 4. SES DOSYASI -->
+    <!-- src direkt audio içine yazıldı, source etiketi kullanılmadı -->
+    <audio id="bg-music" loop src="{{ user.audio_url }}"></audio>
 
+    <!-- 5. PROFİL KARTI -->
     <div class="profile-card" id="profile-card">
-        <img src="{{ user.profile_pic_url }}" class="avatar">
-        <div class="username">{{ user.display_name }}</div>
-        {% if user.discord_rpc %}<div style="font-size:12px; margin-bottom:10px; color:#aaa;"><i class="fab fa-discord"></i> Discord'da Oynuyor</div>{% endif %}
+        <img src="{{ user.profile_pic_url }}" class="avatar" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+        
+        <div class="username">
+            {{ user.display_name if user.display_name else user.username }}
+        </div>
+        
+        {% if user.discord_rpc %}
+        <div style="font-size:12px; margin-bottom:10px; color:#aaa;">
+            <i class="fab fa-discord"></i> Discord'da
+        </div>
+        {% endif %}
+
         <div class="desc">{{ user.description }}</div>
-        {% if user.location %}<div style="font-size:12px; margin-bottom:15px; color:#777;"><i class="fas fa-map-marker-alt"></i> {{ user.location }}</div>{% endif %}
+        
+        {% if user.location %}
+        <div style="font-size:12px; margin-bottom:15px; color:#ccc;">
+            <i class="fas fa-map-marker-alt"></i> {{ user.location }}
+        </div>
+        {% endif %}
 
         <div class="socials">
             {% if user.discord %}<a href="{{ user.discord }}" target="_blank"><i class="fab fa-discord"></i></a>{% endif %}
@@ -99,23 +187,53 @@
             {% if user.tiktok %}<a href="{{ user.tiktok }}" target="_blank"><i class="fab fa-tiktok"></i></a>{% endif %}
             {% if user.twitter %}<a href="{{ user.twitter }}" target="_blank"><i class="fab fa-twitter"></i></a>{% endif %}
         </div>
-        <div style="margin-top:20px; font-size:10px; opacity:0.5;"><i class="fas fa-eye"></i> {{ user.view_count }}</div>
+        
+        <div class="view-count">
+            <i class="fas fa-eye"></i> {{ user.view_count }}
+        </div>
     </div>
 
     <script>
+        // Animasyonlu Başlık
         {% if user.animated_title %}
         let titleText = " @{{ user.username }} ";
-        let i = 0; setInterval(() => { document.title = titleText.substring(i) + titleText.substring(0, i); i = (i + 1) % titleText.length; }, 300);
+        let i = 0;
+        setInterval(() => {
+            document.title = titleText.substring(i) + titleText.substring(0, i);
+            i = (i + 1) % titleText.length;
+        }, 400);
         {% endif %}
+
+        // Siteye Giriş Fonksiyonu
         function enterSite() {
-            document.getElementById('enter-overlay').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('enter-overlay').style.display = 'none';
-                document.getElementById('profile-card').style.display = 'block';
-                document.getElementById('profile-card').style.animation = 'fadeIn 1s forwards';
-                let audio = document.getElementById('bg-music');
-                if(audio.getAttribute('src')) { audio.volume = 0.3; audio.play().catch(e=>console.log(e)); }
-            }, 800);
+            var overlay = document.getElementById('enter-overlay');
+            var card = document.getElementById('profile-card');
+            var audio = document.getElementById('bg-music');
+
+            // 1. MÜZİĞİ HEMEN BAŞLAT (Bekleme yapma!)
+            if (audio.getAttribute('src')) {
+                audio.volume = 0.5; // Ses seviyesi %50
+                var playPromise = audio.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.then(_ => {
+                        console.log("Müzik çalıyor.");
+                    })
+                    .catch(error => {
+                        console.log("Müzik hatası:", error);
+                    });
+                }
+            }
+
+            // 2. GÖRSEL EFEKTLERİ YAP
+            overlay.style.opacity = '0';
+            
+            // Overlay'i tamamen kaldır ve kartı göster
+            setTimeout(function() {
+                overlay.style.display = 'none';
+                card.style.display = 'block';
+                card.style.animation = 'fadeIn 1s forwards';
+            }, 500); // 0.5 saniye sonra kart gelir
         }
     </script>
 </body>
